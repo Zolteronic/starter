@@ -7,6 +7,7 @@ import { NavigationContext } from "../components/NavigationContext";
 import { EventContext } from "../components/EventContext";
 
 export const EventPage = () => {
+  const { setSelectedEvent } = useEvents();
   const { eventId } = useParams();
   const {
     events,
@@ -19,6 +20,14 @@ export const EventPage = () => {
   } = useEvents();
   const [event, setEvent] = useState(null);
   const { setShowSidebar } = useContext(NavigationContext);
+
+  useEffect(() => {
+    if (events) {
+      const foundEvent = events.find((event) => event.id === Number(eventId));
+      setEvent(foundEvent);
+      setSelectedEvent(foundEvent); // set the selected event in the context
+    }
+  }, [events, eventId]);
 
   useEffect(() => {
     setShowSidebar(true);
@@ -72,51 +81,49 @@ export const EventPage = () => {
 
   return (
     <>
-      <EventContext.Provider value={{ events, setEvents }}>
-        <Flex justifyContent={"center"} display={"flex"}>
-          <Box
-            display={"flex"}
-            flexDirection={"column"}
-            p={4}
-            m={4}
-            border={"1px"}
-            borderColor={"gray.200"}
-            width={"1000px"}
-            justifyContent={"center"}
-          >
-            <Flex justifyContent={"center"}>
-              <Heading>{event.title}</Heading>
-            </Flex>
-            <Flex justifyContent={"center"} m={4}>
-              <Text fontSize={"lg"} style={{ fontStyle: "italic" }}>
-                {event.description}
-              </Text>
-            </Flex>
-            <Image src={event.image} width={"1000px"}></Image>
-            <Text style={{ fontWeight: "bold" }} mt={4}>
-              Start time: {formattedDate(event.startTime)}
+      <Flex justifyContent={"center"} display={"flex"}>
+        <Box
+          display={"flex"}
+          flexDirection={"column"}
+          p={4}
+          m={4}
+          border={"1px"}
+          borderColor={"gray.200"}
+          width={"1000px"}
+          justifyContent={"center"}
+        >
+          <Flex justifyContent={"center"}>
+            <Heading>{event.title}</Heading>
+          </Flex>
+          <Flex justifyContent={"center"} m={4}>
+            <Text fontSize={"lg"} style={{ fontStyle: "italic" }}>
+              {event.description}
             </Text>
-            <Text style={{ fontWeight: "bold" }} mt={4}>
-              End Time: {formattedDate(event.endTime)}
-            </Text>
-            {event.categoryIds &&
-              event.categoryIds.map((categoryId) => {
-                const category = categories.find(
-                  (category) => category.id === categoryId
-                );
-                return (
-                  <Text mt={2} key={categoryId}>
-                    {category.name}
-                  </Text>
-                );
-              })}
-            {createdByUser && (
-              <Text mt={4}>Created by: {createdByUser.name}</Text>
-            )}
-            <Image mt={4} src={createdByUser.image} width={"150px"}></Image>
-          </Box>
-        </Flex>
-      </EventContext.Provider>
+          </Flex>
+          <Image src={event.image} width={"1000px"}></Image>
+          <Text style={{ fontWeight: "bold" }} mt={4}>
+            Start time: {formattedDate(event.startTime)}
+          </Text>
+          <Text style={{ fontWeight: "bold" }} mt={4}>
+            End Time: {formattedDate(event.endTime)}
+          </Text>
+          {event.categoryIds &&
+            event.categoryIds.map((categoryId) => {
+              const category = categories.find(
+                (category) => category.id === categoryId
+              );
+              return (
+                <Text mt={2} key={categoryId}>
+                  {category.name}
+                </Text>
+              );
+            })}
+          {createdByUser && (
+            <Text mt={4}>Created by: {createdByUser.name}</Text>
+          )}
+          <Image mt={4} src={createdByUser.image} width={"150px"}></Image>
+        </Box>
+      </Flex>
     </>
   );
 };

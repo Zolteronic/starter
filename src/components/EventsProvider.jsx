@@ -5,11 +5,12 @@ const EventsContext = createContext();
 export const useEvents = () => useContext(EventsContext);
 
 export const EventsProvider = ({ children }) => {
-  const [events, setEvents] = useState(null);
+  const [events, setEvents] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   const getUsers = async () => {
     setIsLoading(true);
@@ -54,10 +55,12 @@ export const EventsProvider = ({ children }) => {
         getCategories,
         getListEvents,
         events,
+        setEvents,
         categories,
         users,
         getUsers,
-        setEvents,
+        selectedEvent,
+        setSelectedEvent,
       }}
     >
       {children}

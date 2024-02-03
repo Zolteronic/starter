@@ -145,8 +145,12 @@ export const NewPage = () => {
         </FormControl>
         <FormControl id="categoryIds">
           <FormLabel mt={"20px"}>Category</FormLabel>
-          <Select name="categoryIds" onChange={handleCategoryChange}>
-            <option value="" disabled selected>
+          <Select
+            name="categoryIds"
+            value={formData.categoryIds[0] || ""}
+            onChange={handleCategoryChange}
+          >
+            <option value="" disabled>
               Select a category
             </option>
             {categories.map((category) => (

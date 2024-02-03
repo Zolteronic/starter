@@ -1,50 +1,56 @@
 import React from "react";
-import { Link as RouterLink } from "react-router-dom";
-import { Box, Link, Flex, Spacer, Button } from "@chakra-ui/react";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import {
+  Box,
+  Link,
+  Flex,
+  Spacer,
+  Button,
+  AlertDialog,
+  AlertDialogOverlay,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogBody,
+  AlertDialogFooter,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { NavigationContext } from "./NavigationContext";
 import { useContext } from "react";
-import { EventContext } from "./EventContext";
 import { useEvents } from "../components/EventsProvider";
 
 export const Navigation = () => {
+  const { selectedEvent, setSelectedEvent } = useEvents();
   const { showSidebar } = useContext(NavigationContext);
-  const { events, setEvents } = useContext(EventContext); // Use event from EventContext
-  const {
-    events: eventsData,
-    categories,
-    users,
-    getUsers,
-    getCategories,
-    getListEvents,
-  } = useEvents();
+  const { events, setEvents } = useEvents(); // Use event from EventContext
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = React.useRef();
+
+  const navigate = useNavigate();
 
   const handleDelete = () => {
-    if (!events) {
-      console.error("No event selected" + events);
+    if (!selectedEvent) {
+      console.error("No event selected");
       return;
     }
 
-    fetch(`http://localhost:3000/events/${events.id}`, {
+    fetch(`http://localhost:3000/events/${selectedEvent.id}`, {
       method: "DELETE",
     })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to delete event");
-        }
-        setEvents(null);
-        window.location.reload();
+      .then(() => {
+        // Update the local state
+        setEvents(events.filter((event) => event.id !== selectedEvent.id));
+        navigate("/");
+        onClose();
       })
       .catch((error) => {
-        console.error(
-          "There has been a problem with your fetch operation:",
-          error
-        );
+        console.error("There was a problem with the fetch operation: ", error);
       });
   };
 
   const handleEdit = () => {
-    console.log("edit", event);
+    console.log("edit", selectedEvent);
   };
+
   return (
     <Box
       style={{
@@ -82,14 +88,47 @@ export const Navigation = () => {
         >
           <Flex flexDirection={"column"}>
             <Button
-              onClick={handleDelete}
+              as={Link}
+              to="/"
+              onClick={onOpen}
               colorScheme="teal"
               width={"100px"}
               mt={8}
             >
               Delete
             </Button>
-            <Button colorScheme="teal" width={"100px"} mt={8}>
+            <AlertDialog
+              isOpen={isOpen}
+              leastDestructiveRef={cancelRef}
+              onClose={onClose}
+            >
+              <AlertDialogOverlay>
+                <AlertDialogContent>
+                  <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                    Delete Event
+                  </AlertDialogHeader>
+
+                  <AlertDialogBody>
+                    Are you sure? You can't undo this action afterwards.
+                  </AlertDialogBody>
+
+                  <AlertDialogFooter>
+                    <Button ref={cancelRef} onClick={onClose}>
+                      Cancel
+                    </Button>
+                    <Button colorScheme="red" onClick={handleDelete} ml={3}>
+                      Delete
+                    </Button>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialogOverlay>
+            </AlertDialog>
+            <Button
+              onClick={handleEdit}
+              colorScheme="teal"
+              width={"100px"}
+              mt={8}
+            >
               Edit
             </Button>
           </Flex>
