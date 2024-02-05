@@ -8,11 +8,14 @@ import {
   Select,
 } from "@chakra-ui/react";
 import { useEffect, useState, useContext } from "react";
+import { FormDataContext } from "../components/FormDataContext";
 
 import { NavigationContext } from "../components/NavigationContext";
 
 export const NewPage = () => {
   const { setShowSidebar } = useContext(NavigationContext);
+  const { formData, setFormData, categories, setCategories, initialFormData } =
+    useContext(FormDataContext);
 
   useEffect(() => {
     setShowSidebar(false);
@@ -21,20 +24,7 @@ export const NewPage = () => {
     };
   }, []);
 
-  const initialFormData = {
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg",
-    createdBy: "",
-    title: "",
-    description: "",
-    startTime: "",
-    endTime: "",
-    categoryIds: [],
-  };
-
-  const [formData, setFormData] = useState(initialFormData);
   const [users, setUsers] = useState([]);
-  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -90,7 +80,6 @@ export const NewPage = () => {
       }),
     });
 
-    // Reset form data
     setFormData(initialFormData);
   };
   const handleChange = (event) => {

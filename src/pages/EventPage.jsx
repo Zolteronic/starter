@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { Box, Heading, Image, Flex, Text } from "@chakra-ui/react";
 import { NavigationContext } from "../components/NavigationContext";
-import { EventContext } from "../components/EventContext";
 
 export const EventPage = () => {
   const { setSelectedEvent } = useEvents();
@@ -16,16 +15,21 @@ export const EventPage = () => {
     getUsers,
     users,
     categories,
-    setEvents,
+    isLoading,
+    error,
   } = useEvents();
   const [event, setEvent] = useState(null);
-  const { setShowSidebar } = useContext(NavigationContext);
+  const { setShowSidebar, setCurrentEventId } = useContext(NavigationContext);
+
+  useEffect(() => {
+    setCurrentEventId(eventId);
+  }, [eventId, setCurrentEventId]);
 
   useEffect(() => {
     if (events) {
       const foundEvent = events.find((event) => event.id === Number(eventId));
       setEvent(foundEvent);
-      setSelectedEvent(foundEvent); // set the selected event in the context
+      setSelectedEvent(foundEvent);
     }
   }, [events, eventId]);
 
@@ -72,8 +76,17 @@ export const EventPage = () => {
     }
   }, [events, eventId]);
 
-  if (!event) {
-    return <div>Loading...</div>;
+  if (
+    isLoading ||
+    !categories ||
+    !event ||
+    !events ||
+    (event && (!event.image || !event.title))
+  ) {
+    return <p>Loading...</p>;
+  }
+  if (error) {
+    return <p>Something went wrong: {error.message}</p>;
   }
   console.log("users:", users);
 
@@ -113,15 +126,19 @@ export const EventPage = () => {
                 (category) => category.id === categoryId
               );
               return (
-                <Text mt={2} key={categoryId}>
-                  {category.name}
-                </Text>
+                category && (
+                  <Text mt={2} key={categoryId}>
+                    {category.name}
+                  </Text>
+                )
               );
             })}
           {createdByUser && (
-            <Text mt={4}>Created by: {createdByUser.name}</Text>
+            <>
+              <Text mt={4}>Created by: {createdByUser.name}</Text>
+              <Image mt={4} src={createdByUser.image} width={"150px"}></Image>
+            </>
           )}
-          <Image mt={4} src={createdByUser.image} width={"150px"}></Image>
         </Box>
       </Flex>
     </>
